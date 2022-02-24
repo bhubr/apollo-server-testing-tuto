@@ -90,7 +90,9 @@ On va s'inspirer du code présenté dans la doc d'Apollo Server, en modifiant le
 * On veut écrire une fonction resolver, pour une query `hello` qui accepte un paramètre `name`. Ce resolver doit renvoyer `hello <name>`. Par exemple `hello Toto` si `name` vaut `"Toto"`.
 * Différence avec l'exemple initial : si le paramètre `name` est `null` ou une string vide, on veut renvoyer une erreur.
 
-À nouveau, dans cet exemple, on a tout mis au même endroit, ce qui n'est pas très réaliste.
+À nouveau, dans cet exemple, on a tout mis au même endroit, ce qui n'est pas très réaliste. C'est le fichier `src/hello.test.ts`.
+
+> Pour lancer les tests : `yarn test`.
 
 ```typescript
 // src/hello.test.ts
@@ -150,6 +152,7 @@ describe('test hello resolver', () => {
 
     const result = await testServer.executeOperation({
       query: 'query SayHelloWorld($name: String) { hello(name: $name) }',
+      // Cette fois name est vide !!
       variables: { name: '' },
     });
 
@@ -163,3 +166,5 @@ describe('test hello resolver', () => {
   });
 })
 ```
+
+La doc fournit un exemple plus complexe avec simulation de l'envoi de requêtes HTTP.

@@ -4,6 +4,14 @@
 
 Cet article s'inspire de la section [Integration testing](https://www.apollographql.com/docs/apollo-server/testing/testing/) de la documentation d'Apollo Server (v3 au moment où j'écris).
 
+## Exemples
+
+Ce repo est fourni avec un exemple de test (simple) sur Apollo Server.
+
+Installez Yarn si vous ne l'avez pas encore fait : `npm i -g yarn`
+
+Puis installez les dépendances : `yarn`
+
 ## Pourquoi tester ? Que tester ?
 
 D'une façon générale, tester son code permet :
@@ -85,7 +93,9 @@ On va s'inspirer du code présenté dans la doc d'Apollo Server, en modifiant le
 À nouveau, dans cet exemple, on a tout mis au même endroit, ce qui n'est pas très réaliste.
 
 ```typescript
-import { ApolloServer, UserInputError } from 'apollo-server';
+// src/hello.test.ts
+import { ApolloServer, gql, UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 
 const typeDefs = gql`
   type Query {
@@ -96,14 +106,14 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     // ICI, différence d'implémentation avec l'exemple original
-    hello: (_, { name }) => {
+    hello: (_: any, { name }: { name: string }) => {
       // Si name est absent/vide, on renvoie une erreur particulière
       // (UserInputError qui est une classe héritée de Error)
       if (!name) {
         throw new UserInputError('name should be provided')
       }
       // Sinon on renvoie le nom
-      return `Hello ${name}!`,
+      return `Hello ${name}!`;
     }
   },
 };
@@ -145,9 +155,11 @@ describe('test hello resolver', () => {
 
     // `errors` ne DOIT PAS être undefined
     expect(result.errors).toBeDefined();
-    // data.hello DOIT être null
-    expect(result.data?.hello).toBe(null);
+    // `errors` est un tableau d'objets, chacun contenant une clé message
+    const errors = result?.errors as GraphQLError[];
+    expect(errors[0]?.message).toBe('name should be provided');
+    // data DOIT être null
+    expect(result.data).toBe(null);
   });
 })
-
 ```
